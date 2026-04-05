@@ -134,10 +134,10 @@ use_flash_attention: true            # 使用Flash Attention 2加速训练
 
 # 分布式训练
 mixed_precision: "bf16"
-gradient_checkpointing: true         # 启用梯度检查点以节省显存
+gradient_checkpointing: false         # 启用梯度检查点以节省显存
 
 # 日志和保存（减少日志输出）
-output_dir: "./outputs/conditions_m_multires_p/8BInstruct_full_vision_bs256Ktokens_lr1e-5_continue"
+output_dir: "./outputs/Qwen3-8B_initial"
 
 logging_steps: 10                    # 每50步记录一次
 save_steps: 1000                     # 每1000步保存一次
