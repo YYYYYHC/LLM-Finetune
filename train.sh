@@ -23,4 +23,4 @@ accelerate launch \
     --config "$CONFIG" || true
 
 
-python ../gpu_test.py > /dev/null 2>&1
+python /apdcephfs_nj7/share_1220751/hcyuan/test.py
