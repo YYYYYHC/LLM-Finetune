@@ -83,7 +83,7 @@ freeze_vision_merger: False
 
 
 # 方式2: 使用单个数据集文件（取消下面注释并注释掉batch_dirs）
-dataset_path: "/apdcephfs_nj7/share_1220751/hcyuan/mesh_d8/slice_30uniform_sub_token/dataset_dict.json"
+dataset_path: "/apdcephfs_nj7/share_1220751/hcyuan/mesh_d8/slice_30uniform_sub_token/"
 validation_split: 0.02
 
 max_length: 16384  # 16K上下文长度
