@@ -47,14 +47,14 @@ This copies 17 JSON files (skipping metadata files `processed.json`, `categories
 
 ```bash
 python -m src.data.prepare_dataset \
-    --json_dir /tmp/contour_flat \
-    --output_dir ./data/tokenized/contour_test \
-    --model_name "Qwen/Qwen3-0.6B" \
-    --max_length 8500 \
+    --json_dir /apdcephfs_nj7/share_1220751/hcyuan/mesh_d8/slice_30uniform \
+    --output_dir /apdcephfs_nj7/share_1220751/hcyuan/mesh_d8/slice_30uniform_token \
+    --model_name "Qwen/Qwen3-8B" \
+    --max_length 16384 \
     --mode contour \
     --seed 42 \
-    --num_proc 4 \
-    --test_split 0.0
+    --num_proc 64 \
+    --test_split 0.05
 ```
 
 Samples exceeding `max_length` are automatically dropped. With 8500, 3 out of 17 files survive (7681, 8344, 8456 tokens). The rest are too large.

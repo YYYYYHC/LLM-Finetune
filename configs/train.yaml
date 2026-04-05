@@ -14,67 +14,67 @@ freeze_vision_merger: False
 # 方式1: 使用batch目录（如果你已经准备好了batch数据）
 # base_dir 应该指向 prepare_data.sh 的 OUTPUT_DIR（包含 batch_XXXX 子目录）
 # train_batches/eval_batches 支持范围格式: "1-45" 或列表 [0, 1, 2] 或混合 [0, "5-10", 15]
-batch_dirs:
-  - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part1-5_res1024x512"
-    train_batches: "0-13"
-    eval_batches: [14]
-  - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part6-8_res1024x512"
-    train_batches: "0-21"
-    eval_batches: [22]
-  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part1-5_85k"
-  #   train_batches: "0-16"
-  #   eval_batches: [17]
-  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part6_27k"
-  #   train_batches: "0-4"
-  #   eval_batches: [5]
-  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part7_40k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part8_43k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part1-5_85k"
-  #   train_batches: "0-16"
-  #   eval_batches: [17]
-  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part6_27k"
-  #   train_batches: "0-4"
-  #   eval_batches: [5]
-  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part7_40k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part8_43k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_res512_num1-10"
-  #   train_batches: "0-13"
-  #   eval_batches: [14]
-  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6_res512_num1-10"
-  #   train_batches: "0-4"
-  #   eval_batches: [5]
-  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part7_res512_num1-10"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part8_res512_num1-10"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part1-5_85k"
-  #   train_batches: "0-13"
-  #   eval_batches: [14]
-  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part6_27k"
-  #   train_batches: "0-4"
-  #   eval_batches: [5]
-  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part7_40k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part8_43k"
-  #   train_batches: "0-7"
-  #   eval_batches: [8]
-  - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_multires384-768"
-    train_batches: "0-13"
-    eval_batches: [14]
-  - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6-8_multires384-768"
-    train_batches: "0-21"
-    eval_batches: [22]
+# batch_dirs:
+#   - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part1-5_res1024x512"
+#     train_batches: "0-13"
+#     eval_batches: [14]
+#   - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part6-8_res1024x512"
+#     train_batches: "0-21"
+#     eval_batches: [22]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part1-5_85k"
+#   #   train_batches: "0-16"
+#   #   eval_batches: [17]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part6_27k"
+#   #   train_batches: "0-4"
+#   #   eval_batches: [5]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part7_40k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part8_43k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part1-5_85k"
+#   #   train_batches: "0-16"
+#   #   eval_batches: [17]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part6_27k"
+#   #   train_batches: "0-4"
+#   #   eval_batches: [5]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part7_40k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part8_43k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_res512_num1-10"
+#   #   train_batches: "0-13"
+#   #   eval_batches: [14]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6_res512_num1-10"
+#   #   train_batches: "0-4"
+#   #   eval_batches: [5]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part7_res512_num1-10"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part8_res512_num1-10"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part1-5_85k"
+#   #   train_batches: "0-13"
+#   #   eval_batches: [14]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part6_27k"
+#   #   train_batches: "0-4"
+#   #   eval_batches: [5]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part7_40k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part8_43k"
+#   #   train_batches: "0-7"
+#   #   eval_batches: [8]
+#   - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_multires384-768"
+#     train_batches: "0-13"
+#     eval_batches: [14]
+#   - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6-8_multires384-768"
+#     train_batches: "0-21"
+#     eval_batches: [22]
 
 # batch_dirs:
 #   - base_dir: "/root/lutaojiang/data_clothes/GC_vlm_final"
@@ -83,8 +83,8 @@ batch_dirs:
 
 
 # 方式2: 使用单个数据集文件（取消下面注释并注释掉batch_dirs）
-# dataset_path: "/path/to/your/dataset.json"
-# validation_split: 0.02
+dataset_path: "/apdcephfs_nj7/share_1220751/hcyuan/mesh_d8/slice_30uniform_sub_token/dataset_dict.json"
+validation_split: 0.02
 
 max_length: 16384  # 16K上下文长度
 pad_to_max_length: true  # 全量微调建议填充到最大长度以测试显存占用，但是开着反而更快并且显存稳定。

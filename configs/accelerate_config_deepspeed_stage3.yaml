@@ -12,7 +12,7 @@ compute_environment: LOCAL_MACHINE
 
 distributed_type: DEEPSPEED
 
-num_processes: 8  # GPU数量，根据实际情况调整
+num_processes: 7  # GPU数量，根据实际情况调整
 
 # GPU配置
 gpu_ids: all
