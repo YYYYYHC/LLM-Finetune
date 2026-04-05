@@ -1,0 +1,46 @@
+# Accelerate配置 - FSDP用于全量微调
+# 使用FSDP (Fully Sharded Data Parallel) 来分片大模型
+# 适用于全量微调Qwen-8B等大模型
+
+compute_environment: LOCAL_MACHINE
+
+distributed_type: FSDP  # 使用FSDP进行完全分片
+
+num_processes: 8  # GPU数量，根据实际情况调整
+
+# GPU配置
+gpu_ids: all
+mixed_precision: bf16  # BFloat16精度
+
+# FSDP配置
+fsdp_config:
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_backward_prefetch_policy: BACKWARD_PRE
+  fsdp_sharding_strategy: FULL_SHARD        # 完全分片策略
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_forward_prefetch: false
+  fsdp_offload_params: false                # 是否卸载参数到CPU（节省显存但降低速度）
+  fsdp_use_orig_params: true
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_sync_module_states: true
+
+# 分布式设置
+machine_rank: 0
+num_machines: 1
+main_process_ip: null
+main_process_port: null
+
+# 其他设置
+use_cpu: false
+rdzv_backend: static
+same_network: true
+main_training_function: main
+downcast_bf16: "no"
+tpu_use_cluster: false
+tpu_use_sudo: false
+
+# 说明:
+# 1. FSDP会将模型参数分片到所有GPU上，大幅降低单卡显存需求
+# 2. fsdp_offload_params=true可以进一步降低显存，但会降低训练速度
+# 3. 如果显存仍然不足，可以考虑使用DeepSpeed ZeRO-3
+

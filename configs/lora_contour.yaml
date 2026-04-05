@@ -1,0 +1,79 @@
+# LoRA fine-tuning config - Contour data on single RTX 4090 (24GB)
+# Qwen3-0.6B without quantization + LoRA + gradient checkpointing
+
+# Model config
+model_name: "Qwen/Qwen3-0.6B"
+training_mode: "lora"
+
+# Data config - single dataset directory
+dataset_path: "./data/tokenized/contour_test"
+
+max_length: 8500
+pad_to_max_length: false
+
+# LoRA config
+lora_config:
+  r: 32
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  bias: "none"
+
+# No quantization needed for 0.6B model
+load_in_4bit: false
+load_in_8bit: false
+
+# Training hyperparameters
+num_epochs: 100
+per_device_train_batch_size: 1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 1
+
+# Optimizer
+optimizer: "adamw"
+learning_rate: 2.0e-4
+weight_decay: 0.01
+adam_betas: [0.9, 0.999]
+adam_epsilon: 1.0e-8
+max_grad_norm: 1.0
+
+# Scheduler
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.1
+
+# Model settings
+torch_dtype: "bfloat16"
+use_flash_attention: true
+
+# Distributed training (single GPU)
+mixed_precision: "bf16"
+gradient_checkpointing: true
+
+# Logging and saving
+output_dir: "./outputs/contour_lora_qwen3_0.6b"
+logging_steps: 1
+save_steps: 50
+eval_steps: 50
+
+# Logging
+log_with: "tensorboard"
+project_name: "contour-finetuning"
+
+# Evaluation
+do_eval: false
+
+# Reproducibility
+seed: 42
+
+# DataLoader
+dataloader_num_workers: 0
+
+# Tokenizer
+padding_side: "right"

@@ -1,0 +1,76 @@
+# Accelerate配置 - DeepSpeed用于LoRA微调
+# 使用DeepSpeed ZeRO Stage 2 进行高效训练
+# 适用于LoRA微调Qwen等大模型
+# 
+# 重要说明：
+# - ZeRO Stage 2 与 LoRA 兼容性最好
+# - ZeRO Stage 3 可能与 LoRA 的冻结参数产生冲突，不推荐使用
+# - 如需使用 ZeRO Stage 3，需要特殊配置
+
+compute_environment: LOCAL_MACHINE
+
+distributed_type: DEEPSPEED
+
+num_processes: 8  # GPU数量，根据实际情况调整
+
+# GPU配置
+gpu_ids: all
+mixed_precision: bf16  # BFloat16精度
+
+# DeepSpeed配置
+deepspeed_config:
+  # ZeRO优化配置
+  zero_stage: 2  # LoRA推荐使用ZeRO Stage 2
+  
+  
+  # 卸载配置 (ZeRO Stage 2) - 显存优化版本
+  offload_optimizer_device: cpu      # 将优化器状态卸载到CPU，大幅减少显存
+  offload_optimizer_pin_memory: true # 使用pin memory加速CPU-GPU传输
+  offload_param_device: cpu         # 参数保留在GPU上
+  offload_param_pin_memory: true     # 参数使用pin memory
+  
+  # ZeRO Stage 3 配置 (当前禁用，因为使用Stage 2)
+  zero3_init_flag: false             # LoRA不需要ZeRO-3初始化
+  zero3_save_16bit_model: false      # Stage 2不需要此选项
+  
+  # 混合精度配置
+  bf16:
+    enabled: true
+  
+  # 通信优化 - 减小bucket size以降低显存峰值
+  overlap_comm: true                 # 通信和计算重叠
+  contiguous_gradients: true         # 连续梯度存储
+  reduce_scatter: true               # 使用reduce_scatter
+  reduce_bucket_size: 2e8            # 减小reduce bucket大小 (200MB)
+  allgather_bucket_size: 2e8         # 减小allgather bucket大小 (200MB)
+  
+  # 额外内存优化
+  stage3_prefetch_bucket_size: 0     # 禁用prefetch节省显存
+  stage3_param_persistence_threshold: 0
+
+# 分布式设置
+machine_rank: 0
+num_machines: 1
+main_process_ip: null
+main_process_port: null
+
+# 其他设置
+use_cpu: false
+rdzv_backend: static
+same_network: true
+main_training_function: main
+downcast_bf16: "no"
+tpu_use_cluster: false
+tpu_use_sudo: false
+
+# =============================================
+# 使用说明
+# =============================================
+# 1. 此配置专为LoRA微调优化，使用ZeRO Stage 2
+# 2. 如果显存不足，可以设置:
+#    offload_optimizer_device: cpu  # 将优化器状态卸载到CPU
+# 3. 不建议在LoRA中使用ZeRO Stage 3，因为:
+#    - LoRA只训练少量参数，Stage 3的参数分片收益有限
+#    - Stage 3可能与冻结的基础模型参数产生冲突
+# 4. 训练时使用:
+#    accelerate launch --config_file configs/accelerate_config_deepspeed.yaml train.py --config your_config.yaml

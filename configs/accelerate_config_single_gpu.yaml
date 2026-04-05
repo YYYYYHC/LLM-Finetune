@@ -1,0 +1,13 @@
+compute_environment: LOCAL_MACHINE
+distributed_type: "NO"
+num_processes: 1
+gpu_ids: all
+mixed_precision: bf16
+machine_rank: 0
+num_machines: 1
+main_process_ip: null
+main_process_port: null
+dynamo_backend: "no"
+use_cpu: false
+main_training_function: main
+downcast_bf16: "no"

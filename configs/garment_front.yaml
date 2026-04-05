@@ -1,0 +1,174 @@
+# LoRA 微调配置 - Qwen-8B 16K上下文
+# 硬件要求: 建议使用 4-8x GPU (每张 24GB+ 显存)
+# 16K上下文长度下，单张GPU约需要20-30GB显存
+
+# 模型配置
+# model_name: "outputs/conditions_m_multires/8BInstruct_full_vision_bs256Ktokens_lr5e-5/final"
+model_name: "Qwen/Qwen3-VL-8B-Instruct"
+training_mode: "full"
+
+freeze_vision_encoder: False
+freeze_vision_merger: False
+
+# 数据配置
+# 方式1: 使用batch目录（如果你已经准备好了batch数据）
+# base_dir 应该指向 prepare_data.sh 的 OUTPUT_DIR（包含 batch_XXXX 子目录）
+# train_batches/eval_batches 支持范围格式: "1-45" 或列表 [0, 1, 2] 或混合 [0, "5-10", 15]
+# batch_dirs:
+  # - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part1-5_res1024x512"
+  #   train_batches: "0-13"
+  #   eval_batches: [14]
+  # - base_dir: "/root/lutaojiang/data/tokenized/panorama_condition_part6-8_res1024x512"
+  #   train_batches: "0-21"
+  #   eval_batches: [22]
+  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part1-5_85k"
+  #   train_batches: "0-16"
+  #   eval_batches: [17]
+  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part6_27k"
+  #   train_batches: "0-4"
+  #   eval_batches: [5]
+  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part7_40k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/caption_condition_high_density_part8_43k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part1-5_85k"
+  #   train_batches: "0-16"
+  #   eval_batches: [17]
+  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part6_27k"
+  #   train_batches: "0-4"
+  #   eval_batches: [5]
+  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part7_40k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/blueprint_condition_high_density_part8_43k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_res512_num1-10"
+  #   train_batches: "0-13"
+  #   eval_batches: [14]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6_res512_num1-10"
+  #   train_batches: "0-4"
+  #   eval_batches: [5]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part7_res512_num1-10"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part8_res512_num1-10"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part1-5_85k"
+  #   train_batches: "0-13"
+  #   eval_batches: [14]
+  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part6_27k"
+  #   train_batches: "0-4"
+  #   eval_batches: [5]
+  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part7_40k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/single_condition_part8_43k"
+  #   train_batches: "0-7"
+  #   eval_batches: [8]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part1-5_multires384-768"
+  #   train_batches: "0-13"
+  #   eval_batches: [14]
+  # - base_dir: "/root/lutaojiang/data/tokenized/mv_condition_part6-8_multires384-768"
+  #   train_batches: "0-21"
+  #   eval_batches: [22]
+
+batch_dirs:
+  - base_dir: "/root/lutaojiang/data_clothes/GC_vlm_final_front"
+    train_batches: "0-50"
+    eval_batches: [51]
+
+
+# 方式2: 使用单个数据集文件（取消下面注释并注释掉batch_dirs）
+# dataset_path: "/path/to/your/dataset.json"
+# validation_split: 0.02
+
+max_length: 16384  # 16K上下文长度
+pad_to_max_length: true  # 全量微调建议填充到最大长度以测试显存占用，但是开着反而更快并且显存稳定。
+
+# # LoRA 配置
+# lora_config:
+#   r: 128                # LoRA秩，可以调整为32/64/128
+#   lora_alpha: 256       # LoRA缩放因子
+#   lora_dropout: 0    # Dropout率
+#   target_modules:      # 应用LoRA的目标模块
+#     - "q_proj"
+#     - "k_proj"
+#     - "v_proj"
+#     - "o_proj"
+#     - "gate_proj"
+#     - "up_proj"
+#     - "down_proj"
+#   bias: "none"
+
+# 量化配置（可选，用于节省显存）
+load_in_4bit: false     # 4-bit量化，可大幅降低显存
+load_in_8bit: false     # 8-bit量化
+
+# 训练超参数
+num_epochs: 2
+per_device_train_batch_size: 1      # 每张GPU的batch size
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 1      # 梯度累积步数
+                                      # 实际batch_size = per_device_train_batch_size × gradient_accumulation_steps × num_gpus
+
+# 优化器配置
+optimizer: "adamw"
+learning_rate: 5.0e-5               # LoRA推荐学习率 1e-4 到 3e-4
+weight_decay: 0.01
+adam_betas: [0.9, 0.999]
+adam_epsilon: 1.0e-8
+max_grad_norm: 1.0
+
+# 学习率调度器
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.05                   # 减少warmup比例以节省时间
+# warmup_steps: 200  # 指定100步的warmup 
+
+# 模型设置
+torch_dtype: "bfloat16"              # 使用bfloat16以获得更好的数值稳定性
+use_flash_attention: true            # 使用Flash Attention 2加速训练
+
+# 分布式训练
+mixed_precision: "bf16"
+gradient_checkpointing: true         # 启用梯度检查点以节省显存
+
+# 日志和保存（减少日志输出）
+output_dir: "./outputs/clothes/GC_vlm_final_front/8BInstruct_full_vision_bs256Ktokens_lr5e-5"
+
+logging_steps: 10                    # 每50步记录一次
+save_steps: 1000                     # 每1000步保存一次
+eval_steps: 10000                     # 每2000步评估一次
+# save_total_limit: 3                 # 最多保存5个检查点，防止占用过多磁盘空间
+
+# 日志记录配置
+log_with: "tensorboard"              # 可选: "tensorboard", "wandb"
+project_name: "llm-finetuning"       # 项目名称（用于TensorBoard/WandB）
+
+# 断点续训（可选）
+# resume_from_checkpoint: "./outputs/condition_b_c_m_p/8BInstruct_part1-8hd_r128alpha256_bs256Ktokens_lr2e-4/checkpoint-4000"  # 从指定检查点继续训练
+
+# # 用旧 checkpoint 初始化，但从头开始新训练
+# init_from_checkpoint: "./outputs/condition_m/8BInstruct_part1-8hd_r128alpha256_bs256Ktokens_lr2e-4/checkpoint-13000"
+
+# 评估
+do_eval: true
+
+# 可重现性
+seed: 666
+
+# DataLoader
+dataloader_num_workers: 0
+
+# Tokenizer设置
+padding_side: "right"
+
+# 说明:
+# 1. 16K上下文长度时，建议使用gradient_checkpointing节省显存
+# 2. 如果显存不足，可以开启load_in_4bit或load_in_8bit
+# 3. batch_size × gradient_accumulation_steps 应该在128-256之间
+# 4. 训练时间估算: 在8xH20 GPU上约需要数小时到一天，取决于数据量
+

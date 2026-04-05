@@ -1,0 +1,43 @@
+# Accelerate Configuration for Multi-GPU Training
+# Hardware: 8x H20 96GB GPUs
+
+compute_environment: LOCAL_MACHINE
+
+distributed_type: MULTI_GPU  # Use FSDP for even larger models if needed
+
+num_processes: 8  # Number of GPUs
+
+# GPU Configuration
+gpu_ids: all  # Use all available GPUs
+mixed_precision: bf16  # BFloat16 for H20 GPUs
+
+# Distributed Settings
+machine_rank: 0
+num_machines: 1
+main_process_ip: null
+main_process_port: null
+
+# DeepSpeed (Optional - uncomment to use DeepSpeed)
+# deepspeed_config:
+#   gradient_accumulation_steps: 8
+#   gradient_clipping: 1.0
+#   offload_optimizer_device: none
+#   offload_param_device: none
+#   zero_stage: 2  # ZeRO Stage 2 for memory efficiency
+#   zero3_init_flag: false
+
+# Gradient Accumulation
+# Note: This is set in the training config, not here
+
+# Dynamic Loss Scaling
+dynamo_backend: "no"  # Set to "inductor" for PyTorch 2.0+ optimization
+
+# Additional Settings
+use_cpu: false
+rdzv_backend: static
+same_network: true
+main_training_function: main
+downcast_bf16: "no"
+tpu_use_cluster: false
+tpu_use_sudo: false
+

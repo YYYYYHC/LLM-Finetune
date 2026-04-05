@@ -1,0 +1,103 @@
+# 全量微调配置 - Qwen-8B 16K上下文
+# 硬件要求: 需要 8x GPU (每张 80GB+ 显存)，或者使用DeepSpeed ZeRO-3
+# 16K上下文长度下，显存需求较大，建议使用 8xA100 80GB 或 8xH100
+
+# 模型配置
+model_name: "Qwen/Qwen3-8B"  # 或者使用 "Qwen/Qwen-7B"
+training_mode: "full"
+
+# 数据配置
+# 方式1: 使用batch目录（如果你已经准备好了batch数据）
+# base_dir 应该指向 prepare_data.sh 的 OUTPUT_DIR（包含 batch_XXXX 子目录）
+# train_batches/eval_batches 支持范围格式: "1-45" 或列表 [0, 1, 2] 或混合 [0, "5-10", 15]
+batch_dirs:
+  base_dir: "/root/lutaojiang/data/json_304k_qwen3_8b_tokenization"
+  train_batches: "1-60"  # 等价于 [1, 2, 3, ..., 45]
+  eval_batches: [0]
+
+# 方式2: 使用单个数据集文件（取消下面注释并注释掉batch_dirs）
+# dataset_path: "/path/to/your/dataset.json"
+# validation_split: 0.02
+
+max_length: 16384  # 16K上下文长度
+pad_to_max_length: true  # 全量微调建议填充到最大长度以测试显存占用，但是开着反而更快并且显存稳定。
+
+# 量化配置（全量微调不推荐量化，会影响效果）
+load_in_4bit: false
+load_in_8bit: false
+
+# 训练超参数
+num_epochs: 3
+per_device_train_batch_size: 1      # 每张GPU的batch size，16K下建议设为1
+per_device_eval_batch_size: 1
+gradient_accumulation_steps: 32     # 增加梯度累积以保持有效batch size
+                                     # 实际batch_size = per_device_train_batch_size × gradient_accumulation_steps × num_gpus
+
+# 优化器配置
+optimizer: "adamw"
+learning_rate: 5.0e-6               # 全量微调推荐更小的学习率 1e-6 到 1e-5
+weight_decay: 0.01
+adam_betas: [0.9, 0.999]
+adam_epsilon: 1.0e-8
+max_grad_norm: 1.0
+
+# 学习率调度器
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.03                  # 减少warmup比例
+
+# 模型设置
+torch_dtype: "bfloat16"             # 使用bfloat16
+use_flash_attention: true           # 使用Flash Attention 2加速
+
+# 分布式训练（全量微调强烈推荐使用FSDP或DeepSpeed）
+mixed_precision: "bf16"
+gradient_checkpointing: true        # 必须启用以节省显存
+
+# FSDP配置（推荐用于全量微调）
+# 需要在accelerate_config.yaml中配置FSDP
+fsdp: true
+fsdp_config:
+  sharding_strategy: "FULL_SHARD"   # 完全分片
+  offload_params: false              # 是否卸载参数到CPU（会降低速度但节省显存）
+  
+# DeepSpeed配置（可选，如果不使用FSDP）
+# use_deepspeed: true
+# deepspeed_config: "configs/deepspeed_zero3.json"
+
+# 日志和保存（减少日志输出）
+output_dir: "./outputs/full_finetune_qwen8b_16k"
+logging_steps: 50                   # 每50步记录一次
+save_steps: 500                     # 每500步保存一次（全量微调检查点较大）
+eval_steps: 500                     # 每500步评估一次
+
+# 日志记录配置
+log_with: "tensorboard"             # 可选: "tensorboard", "wandb"
+project_name: "llm-finetuning"      # 项目名称（用于TensorBoard/WandB）
+
+# 断点续训（可选）
+# resume_from_checkpoint: "./outputs/full_finetune_qwen8b_16k/checkpoint-500"  # 从指定检查点继续训练
+
+# 评估
+do_eval: true
+
+# 可重现性
+seed: 42
+
+# DataLoader
+dataloader_num_workers: 4
+
+# Tokenizer设置
+padding_side: "right"
+
+# 警告和注意事项:
+# 1. 全量微调需要大量显存，16K上下文下每张GPU约需60-80GB
+# 2. 必须使用FSDP或DeepSpeed ZeRO-3来分片模型参数
+# 3. 强烈建议gradient_checkpointing=true以节省显存
+# 4. 检查点文件会很大（约15-20GB每个），注意磁盘空间
+# 5. 训练速度较慢，在8xH20 GPU上预计需要数天时间
+# 6. 如果显存不足，考虑：
+#    - 减小per_device_train_batch_size到1
+#    - 增加gradient_accumulation_steps
+#    - 启用FSDP的offload_params（会降低速度）
+#    - 使用DeepSpeed ZeRO-3的CPU/NVMe offload
+

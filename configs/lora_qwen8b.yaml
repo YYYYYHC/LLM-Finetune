@@ -1,0 +1,108 @@
+# LoRA 微调配置 - Qwen-8B 16K上下文
+# 硬件要求: 建议使用 4-8x GPU (每张 24GB+ 显存)
+# 16K上下文长度下，单张GPU约需要20-30GB显存
+
+# 模型配置
+model_name: "Qwen/Qwen3-8B"  # 或者使用 "Qwen/Qwen-7B"
+training_mode: "lora"
+
+# 数据配置
+# 方式1: 单个batch目录
+# batch_dirs:
+#   base_dir: "/path/to/data"
+#   train_batches: "1-20"  # 支持范围 "1-45" 或列表 [0, 1, 2] 或混合 [0, "5-10", 15]
+#   eval_batches: [0]
+
+# 方式2: 多个batch目录（每个目录可以独立指定eval batch）
+batch_dirs:
+  - base_dir: "/root/lutaojiang/data/json_304k_qwen3_8b_filtered_6K"
+    train_batches: "1-20"
+    eval_batches: [0]
+  # - base_dir: "/path/to/another/data"
+  #   train_batches: "1-15"
+  #   eval_batches: [0]
+
+# 方式3: 使用单个数据集文件（取消下面注释并注释掉batch_dirs）
+# dataset_path: "/path/to/your/dataset.json"
+# validation_split: 0.02
+
+max_length: 6144  # 16K上下文长度
+pad_to_max_length: true  # 全量微调建议填充到最大长度以测试显存占用，但是开着反而更快并且显存稳定。
+
+# LoRA 配置
+lora_config:
+  r: 64                # LoRA秩，可以调整为32/64/128
+  lora_alpha: 16       # LoRA缩放因子
+  lora_dropout: 0.1    # Dropout率
+  target_modules:      # 应用LoRA的目标模块
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  bias: "none"
+
+# 量化配置（可选，用于节省显存）
+load_in_4bit: false     # 4-bit量化，可大幅降低显存
+load_in_8bit: false     # 8-bit量化
+
+# 训练超参数
+num_epochs: 3
+per_device_train_batch_size: 1      # 每张GPU的batch size
+per_device_eval_batch_size: 2
+gradient_accumulation_steps: 16      # 梯度累积步数
+                                      # 实际batch_size = per_device_train_batch_size × gradient_accumulation_steps × num_gpus
+
+# 优化器配置
+optimizer: "adamw"
+learning_rate: 2.0e-4               # LoRA推荐学习率 1e-4 到 3e-4
+weight_decay: 0.01
+adam_betas: [0.9, 0.999]
+adam_epsilon: 1.0e-8
+max_grad_norm: 1.0
+
+# 学习率调度器
+lr_scheduler_type: "cosine"
+warmup_ratio: 0.05                   # 减少warmup比例以节省时间
+
+# 模型设置
+torch_dtype: "bfloat16"              # 使用bfloat16以获得更好的数值稳定性
+use_flash_attention: true            # 使用Flash Attention 2加速训练
+
+# 分布式训练
+mixed_precision: "bf16"
+gradient_checkpointing: true         # 启用梯度检查点以节省显存
+
+# 日志和保存（减少日志输出）
+output_dir: "./outputs/lora_qwen8b_length6k"
+logging_steps: 50                    # 每50步记录一次
+save_steps: 1000                     # 每1000步保存一次
+eval_steps: 1000                     # 每1000步评估一次
+
+# 日志记录配置
+log_with: "tensorboard"              # 可选: "tensorboard", "wandb"
+project_name: "llm-finetuning"       # 项目名称（用于TensorBoard/WandB）
+
+# 断点续训（可选）
+# resume_from_checkpoint: "./outputs/lora_qwen8b_length6k/checkpoint-1000"  # 从指定检查点继续训练
+
+# 评估
+do_eval: true
+
+# 可重现性
+seed: 42
+
+# DataLoader
+dataloader_num_workers: 4
+
+# Tokenizer设置
+padding_side: "right"
+
+# 说明:
+# 1. 16K上下文长度时，建议使用gradient_checkpointing节省显存
+# 2. 如果显存不足，可以开启load_in_4bit或load_in_8bit
+# 3. batch_size × gradient_accumulation_steps 应该在128-256之间
+# 4. 训练时间估算: 在8xH20 GPU上约需要数小时到一天，取决于数据量
+

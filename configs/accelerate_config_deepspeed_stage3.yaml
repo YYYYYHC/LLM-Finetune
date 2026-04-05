@@ -1,0 +1,100 @@
+# Accelerate配置 - DeepSpeed ZeRO Stage 3
+# 使用DeepSpeed ZeRO Stage 3 进行全参数微调或超大模型训练
+# 适用于显存受限场景，通过参数分片实现极致显存优化
+# 
+# 重要说明：
+# - ZeRO Stage 3 将模型参数、梯度、优化器状态都进行分片
+# - 适合全参数微调或需要极致显存优化的场景
+# - LoRA微调推荐使用Stage 2，Stage 3可能与冻结参数产生冲突
+# - 如果用于LoRA，需要确保正确配置param_persistence_threshold
+
+compute_environment: LOCAL_MACHINE
+
+distributed_type: DEEPSPEED
+
+num_processes: 8  # GPU数量，根据实际情况调整
+
+# GPU配置
+gpu_ids: all
+mixed_precision: bf16  # BFloat16精度
+
+# DeepSpeed配置
+deepspeed_config:
+  # ZeRO优化配置 - Stage 3
+  zero_stage: 3  # ZeRO Stage 3 - 完整的参数分片
+  
+  # 卸载配置 - 可选，用于进一步减少显存
+  # 注意：开启CPU卸载会降低训练速度，但可以训练更大模型
+  offload_optimizer_device: none      # 将优化器状态卸载到CPU
+  offload_optimizer_pin_memory: true # 使用pin memory加速CPU-GPU传输
+  offload_param_device: none          # 将参数卸载到CPU (Stage 3特有)
+  offload_param_pin_memory: true     # 参数使用pin memory
+  
+  # ZeRO Stage 3 特定配置
+  zero3_init_flag: true              # 启用ZeRO-3参数初始化
+  zero3_save_16bit_model: true       # 保存16位模型，方便加载
+  
+  # 混合精度配置
+  bf16:
+    enabled: true
+  
+  # 通信优化
+  overlap_comm: true                 # 通信和计算重叠
+  contiguous_gradients: true         # 连续梯度存储
+  reduce_scatter: true               # 使用reduce_scatter
+  reduce_bucket_size: 5e7            # reduce bucket大小 (50MB，Stage 3建议较小值)
+  allgather_bucket_size: 5e7         # allgather bucket大小 (50MB)
+  
+  # Stage 3 内存优化参数
+  stage3_prefetch_bucket_size: 5e7           # prefetch bucket大小
+  stage3_param_persistence_threshold: 1e5    # 小于此大小的参数保留在GPU上
+  stage3_max_live_parameters: 1e9            # 最大活跃参数数量
+  stage3_max_reuse_distance: 1e9             # 参数重用距离
+  stage3_gather_16bit_weights_on_model_save: true  # 保存时收集16位权重
+  
+
+# 分布式设置
+machine_rank: 0
+num_machines: 1
+main_process_ip: null
+main_process_port: null
+
+# 其他设置
+use_cpu: false
+rdzv_backend: static
+same_network: true
+main_training_function: main
+downcast_bf16: "no"
+tpu_use_cluster: false
+tpu_use_sudo: false
+
+# =============================================
+# 使用说明
+# =============================================
+# 1. 此配置使用ZeRO Stage 3，适合以下场景:
+#    - 全参数微调大模型
+#    - 显存严重不足的情况
+#    - 需要训练超大模型(70B+)
+#
+# 2. 显存优化选项:
+#    - 默认开启CPU卸载，可以训练更大模型
+#    - 如果显存充足，可以关闭卸载以提升速度:
+#      offload_optimizer_device: none
+#      offload_param_device: none
+#
+# 3. 性能优化建议:
+#    - 增大 stage3_prefetch_bucket_size 可提升速度
+#    - 增大 stage3_param_persistence_threshold 可减少通信
+#    - 关闭CPU卸载可显著提升训练速度
+#
+# 4. LoRA微调注意事项:
+#    - 如果用于LoRA，建议改用Stage 2配置
+#    - 如必须使用Stage 3，确保设置较大的param_persistence_threshold
+#
+# 5. 训练命令:
+#    accelerate launch --config_file configs/accelerate_config_deepspeed_stage3.yaml train.py --config your_config.yaml
+#
+# 6. 常见问题:
+#    - OOM错误：减小batch_size或增加梯度累积步数
+#    - 训练慢：关闭CPU卸载或增大bucket_size
+#    - 保存模型问题：确保zero3_save_16bit_model为true
