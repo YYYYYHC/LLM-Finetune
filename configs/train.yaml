@@ -3,8 +3,8 @@
 # 16K上下文长度下，单张GPU约需要20-30GB显存
 
 # 模型配置
-model_name: "outputs/conditions_m_multires/8BInstruct_full_vision_bs256Ktokens_lr5e-5/final"
-# model_name: "Qwen/Qwen3-VL-8B-Instruct"
+# model_name: "outputs/conditions_m_multires/8BInstruct_full_vision_bs256Ktokens_lr5e-5/final"
+model_name: "Qwen/Qwen3-8B"
 training_mode: "full"
 
 freeze_vision_encoder: False
